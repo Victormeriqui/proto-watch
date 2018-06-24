@@ -1,3 +1,9 @@
+/*
+Victor Meriqui
+Created 16/01/2018
+*/
+
+
 #ifndef MATHUTIL_HPP
 #define MATHUTIL_HPP
 
@@ -23,5 +29,28 @@ inline double Logb(double val, int8_t base)
 	return log10(val) / log10(base);
 }
 
+inline int8_t GetMinValue(int8_t arr[], uint8_t arr_c)
+{
+	int8_t min = 0;
+	for (uint8_t i = 0; i < arr_c; i++)
+	{
+		if (arr[i] < arr[min])
+			min = i;
+	}
+
+	return arr[min];
+}
+
+inline int8_t GetMaxValue(int8_t arr[], int arr_c)
+{
+	int8_t max = 0;
+	for (uint8_t i = 0; i < arr_c; i++)
+	{
+		if (arr[i] > arr[max])
+			max = i;
+	}
+
+	return arr[max];
+}
 
 #endif

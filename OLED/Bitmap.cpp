@@ -1,3 +1,8 @@
+/*
+Victor Meriqui
+Created 16/01/2018
+*/
+
 #include "Bitmap.h"
 
 Bitmap::Bitmap()

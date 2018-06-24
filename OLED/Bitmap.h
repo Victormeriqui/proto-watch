@@ -1,6 +1,6 @@
 /*
 Victor Meriqui
-Created 16/10/2016
+Created 16/01/2018
 */
 
 #ifndef BITMAP_H

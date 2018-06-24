@@ -1,6 +1,6 @@
 /*
 Victor Meriqui
-Created 23/05/2018
+Created 23/06/2018
 */
 
 #ifndef CONTROL_H

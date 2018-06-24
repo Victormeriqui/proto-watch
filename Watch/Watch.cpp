@@ -1,6 +1,6 @@
 /*
 Victor Meriqui
-Created 03/08/2017
+Created 23/06/2018
 */
 
 #include "Watch.h"
@@ -22,6 +22,8 @@ Watch::Watch()
 	
 	optionsmenu = new OptionsMenu();
 	notificationmanager = new NotificationManager();
+	
+	curinfo = 0;
 }
 
 Watch::~Watch()
@@ -78,6 +80,37 @@ void Watch::DrawDigitalTime(OLED* oled, uint8_t is24h, uint8_t x, uint8_t y)
 	
 	oled->DrawStringF(x-(fontw*width/2), y-fonth/2, format, formatedhours, minutes, seconds);	
 }
+
+void DrawGraph(OLED* oled, int x, int y, int width, int height, int8_t labels[], int8_t data[], int data_c)
+{
+	int8_t mindata = GetMinValue(data, data_c);
+	int8_t maxdata = GetMaxValue(data, data_c);
+
+	oled->SetFont(SMALL);
+
+	uint8_t fontw = oled->GetFontWidth();
+	uint8_t fonth = oled->GetFontHeight();
+
+	for (uint8_t i = 0; i < data_c; i++)
+	{
+		uint8_t px = (uint8_t)Interpolate(i, 0, data_c-1, x, x + width-(fontw*2));
+		uint8_t py = (uint8_t)Interpolate(data[i], mindata, maxdata, y, y + height - (fonth * 2));
+
+		oled->DrawString(px, y + height - fonth, labels[i]);
+
+		if (i <= (data_c - 2))
+		{
+			uint8_t px2 = (uint8_t)Interpolate(i + 1, 0, data_c - 1, x, x + width - (fontw * 2));
+			uint8_t py2 = (uint8_t)Interpolate(data[i + 1], mindata, maxdata, y, y + height - (fonth * 2));
+
+			oled->DrawLine(px+fontw, py, px2+fontw, py2);
+		}
+				
+	}
+
+}
+
+
 
 void Watch::Draw(OLED* oled)
 {
@@ -171,7 +204,7 @@ void Watch::Draw(OLED* oled)
 	
 			DrawBatteryIndicator(oled, scrw-5, 0);
 			oled->DrawString(0, 0, "Wed, Sept 23");
-			oled->DrawStringF(40, 0, "%d Notifications", notificationmanager->GetNotificationCount());
+			oled->DrawStringF(55, 0, "%d Alerts", notificationmanager->GetNotificationCount());
 			oled->SetFont(LARGE);
 			bigfonth = oled->GetFontHeight();
 			
@@ -181,37 +214,50 @@ void Watch::Draw(OLED* oled)
 			fontw = oled->GetFontWidth();
 			fonth = oled->GetFontHeight();
 
-			
-			Notification lastnot = notificationmanager->GetLastNotification();
-			GetStringSection(lastnot.content, scroll, 29, msg, &ended);
-			
-			if (ended)
-			{
-				if (millis() - prevmillis > 2000)
+			if (curinfo == 0)
+			{				
+				Notification lastnot = notificationmanager->GetLastNotification();
+				GetStringSection(lastnot.content, scroll, 29, msg, &ended);
+				
+				if (ended)
 				{
-					scroll = 0;
-					delay = 2000;
-					prevmillis = millis();
+					if (millis() - prevmillis > 2000)
+					{
+						scroll = 0;
+						delay = 2000;
+						prevmillis = millis();
+					}
 				}
-			}
-			else
-			{
-				if (millis() - prevmillis > delay)
+				else
 				{
-					prevmillis = millis();
-					scroll++;
-					delay = 100	;
+					if (millis() - prevmillis > delay)
+					{
+						prevmillis = millis();
+						scroll++;
+						delay = 100	;
+					}
 				}
+				char title[400];
+				strcpy(title, lastnot.appname);
+				strcat(title, " - ");
+				strcat(title, lastnot.title);
+				strcat(title, ":");
+				title[strlen(title)] = '\0';
+				
+				oled->DrawStringF(0, scrh/2+bigfonth/2+3+fonth, "%s", title);
+				oled->DrawStringF(0, scrh/2+bigfonth/2+3+fonth*2, msg);
 			}
-			char title[400];
-			strcpy(title, lastnot.appname);
-			strcat(title, " - ");
-			strcat(title, lastnot.title);
-			strcat(title, ":");
-			title[strlen(title)] = '\0';
 			
-			oled->DrawStringF(0, scrh/2+bigfonth/2+3+fonth, "%s", title);
-			oled->DrawStringF(0, scrh/2+bigfonth/2+3+fonth*2, msg);
+			if (curinfo == 1)
+			{
+				uint8_t hours12 = (uint8_t)Interpolate(hours, 0, 24, 0, 12);
+				int8_t temperature_labels[] = { hours12-2, hours12-1, hours12, hours12+1, hours12+2 };
+				int8_t temperature_data[] = { 13, 16, 14, 10, 8};
+				uint8_t temperature_c = 5;
+
+				oled->DrawString(1, scrh - fonth, "24 C");
+				DrawGraph(oled, 4*fontw+10, scrh - 20, scrw - 4*fontw-10, 20, temperature_labels, temperature_data, temperature_c);
+			}
 		}
 		
 	
@@ -304,8 +350,10 @@ void Watch::Up()
 	
 	if (state == WATCHFACE_WATCH)
 	{
-		state = OPTIONS_WATCH;
-		optionsmenu->SetState(SELECTING_OPTIONS);
+		//state = OPTIONS_WATCH;
+		//optionsmenu->SetState(SELECTING_OPTIONS);
+		if (curinfo < 1)
+			curinfo++;
 	}
 }
 
@@ -319,8 +367,10 @@ void Watch::Down()
 	
 	if (state == WATCHFACE_WATCH)
 	{
-		state = OPTIONS_WATCH;
-		optionsmenu->SetState(SELECTING_OPTIONS);
+		//state = OPTIONS_WATCH;
+		//optionsmenu->SetState(SELECTING_OPTIONS);
+		if (curinfo > 0)
+			curinfo--;
 	}
 }
 

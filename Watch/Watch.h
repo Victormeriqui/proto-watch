@@ -1,6 +1,6 @@
 /*
 Victor Meriqui
-Created 05/06/2018
+Created 23/06/2018
 */
 
 #ifndef WATCH_H
@@ -19,6 +19,7 @@ enum WatchState
 class Watch
 {
 	WatchState state;
+	uint8_t curinfo;
 	
 	NotificationManager* notificationmanager;
 	OptionsMenu* optionsmenu;

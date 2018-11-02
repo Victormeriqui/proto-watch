@@ -4,7 +4,7 @@ Software for an Arduino based smart-watch prototype. Currently runs on a Teensy 
 This project tries to emulate a smart-watch with several Arduino compatible components:  
   
 Main board: Teensy 3.2 (https://www.pjrc.com/teensy/)  
-Display: Display OLED 124x64 pixeis monocromático (https://www.adafruit.com/product/938)  
+Display: Display OLED 124x64 monochrome (https://www.adafruit.com/product/938)  
 Communications: Bluetooth SH-HC-08  
 Power: Cheap LiPo Battery 500mA  
 Input: 3 way directional button  
